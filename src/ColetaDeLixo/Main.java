@@ -40,7 +40,6 @@ public class Main {
               predecessors.put(removedVertice, x); // add vizinho na predecessor stack
               lambdas.put(x, Math.min(lambdas.get(x), (lambdas.get(removedVertice) + v.getEdges().get(x)))       ); // lambda de x = min(lambda(x) atual, lambda(removed) + custo da aresta entre removed e x ) 
             }
-            //neighbors.add(v);
           }
       }
 
