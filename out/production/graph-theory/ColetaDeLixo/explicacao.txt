@@ -1,0 +1,14 @@
+Para resolver o problema do carteiro chines (PCC), é necessário com que o grafo seja percorrido de uma forma que todas as arestas dele sejam percorridos (achar o circuito euleriano), em um grafo euleriano isso é simples é só aplicar algum algoritmo que encontre o caminho euleriano, mas em grafos não eulerianos é preciso primeiro aplicar o algoritmo de Djikstra e depois o algoritmo de fleury ou Hierholzer.
+
+videoaula: https://www.youtube.com/watch?v=wMVOM5sBrrI
+
+
+Algoritmo:
+ - Verificar se o grafo é euleriano ou não.
+      -> Como saber isso? Verificar o grau dos vértices. Para ser euleriano, não podem ter vértices de grau impar
+ - caso seja euleriano :
+      -> Aplica o algoritmo de Hierholzer ou de Fleury e acha o tour de euler (caminho euleriano).
+ - caso não seja euleriano :
+      -> Tem que utilizar o algoritmo de Djikstra para encontrar o menor caminho entre os grafos impares do grafo.
+      -> Depois de descoberto esse caminho, o que deve ser feito é : Duplicar todas as arestas desse caminho gerando o supergrafo G*
+      -> Aplica o algoritmo de Hierholzer ou de Fleury e acha o tour de euler (caminho euleriano). 

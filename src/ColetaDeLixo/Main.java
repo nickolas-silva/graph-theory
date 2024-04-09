@@ -51,6 +51,8 @@ public class Main {
       // agora, é necessário descobrir os vizinhos de removed
       // Após encontrar os vizinhos, é necessário calcular e atualizar o lambda ( valor minimo entre : prioridades atual do vizinho,
       // prioridade do vertice removido + o custo da aresta entre o removido e o vizinho)
+
+      predecessors.put(root, null); // o root não tem predecessor 
       for(Aresta a: graph.getEdges()){
         if(a.getV1().getName().equals(removedName)){
           // se entrar, o vizinho é v2 e o removido foi v1
@@ -67,14 +69,25 @@ public class Main {
           if(lmbdaAtualizado < lambdas.get(a.getV1())){
             lambdas.put(a.getV1(), lmbdaAtualizado);
             // att predecessores
-            predecessors.put(a.getV2(), removedVertice);
+            predecessors.put(a.getV1(), removedVertice);
           }
         }
       }
     }
     // agora usando os predecessores, se constrói o caminho de custo mínimo
-    Vertice[] = new Vertice[];
-    Graph minimumCostPath = new Graph(null, null);
+    ArrayList<Vertice> vertices = new ArrayList<>(predecessors.size());
+    ArrayList<Aresta> arestas = new ArrayList<>();
+    for(Vertice v: predecessors.keySet()){
+      vertices.add(v); // adicionando os vértices do caminho
+      if(predecessors.get(v) == null)
+        continue;
+      arestas.add(new Aresta(v, predecessors.get(v), 0));
+    }
+    Graph minimumCostPath = new Graph((Vertice[])vertices.toArray(), arestas);
+
+    for(Aresta a: minimumCostPath.getEdges()){
+      System.out.println("Aresta: " + a.getV1().getName() +  " => " + a.getV2().getName());
+    }
 
 
     return null;
@@ -102,8 +115,8 @@ public class Main {
       }
     }
     HashMap<Vertice,Integer> retorno = new HashMap<>();
-    retorno.put(removed, priorityQueue.get(removed));
-    priorityQueue.remove(removed);
+    retorno.put(removed, lambdas.get(removed));
+    lambdas.remove(removed);
     return retorno ; // retorna o vértice que foi removido da fila e sua prioridade.
   }
 
