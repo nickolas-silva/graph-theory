@@ -12,24 +12,24 @@ public class Main {
     // se não, então acha o menor caminho que passe por todos os vértices impares usando djkistra e em seguida gera o supergrafo G*
     // duplicando as arestas do caminho. Aí em seguida, usa o algoritmo de Hierholzer.
     Vertice[] vertices = new Vertice[6];
-    vertices[0] = new Vertice("A");
-    vertices[1] = new Vertice("B");
-    vertices[2] = new Vertice("C");
-    vertices[3] = new Vertice("D");
-    vertices[4] = new Vertice("E");
-    vertices[5] = new Vertice("F");
+    vertices[0] = new Vertice("S");
+    vertices[1] = new Vertice("A");
+    vertices[2] = new Vertice("B");
+    vertices[3] = new Vertice("C");
+    vertices[4] = new Vertice("D");
+    vertices[5] = new Vertice("T");
     ArrayList<Aresta> arestas = new ArrayList<>();
-    arestas.add(new Aresta(vertices[0],vertices[1], 5)); 
-    arestas.add(new Aresta(vertices[0],vertices[2], 2));
-    arestas.add(new Aresta(vertices[2],vertices[1], 7));
-    arestas.add(new Aresta(vertices[2],vertices[3], 4));
-    arestas.add(new Aresta(vertices[1],vertices[3], 8));
-    arestas.add(new Aresta(vertices[2],vertices[4], 5));
-    arestas.add(new Aresta(vertices[4],vertices[3], 5));
-    arestas.add(new Aresta(vertices[4],vertices[5], 5));
-    arestas.add(new Aresta(vertices[3],vertices[5], 5));
+    arestas.add(new Aresta(vertices[0],vertices[1], 18)); // S - A
+    arestas.add(new Aresta(vertices[0],vertices[3], 15)); // S - C
+    arestas.add(new Aresta(vertices[1],vertices[3], 2));  // A - C
+    arestas.add(new Aresta(vertices[2],vertices[1], 9));  // B - A
+    arestas.add(new Aresta(vertices[3],vertices[2], 14)); // C - B
+    arestas.add(new Aresta(vertices[3],vertices[4], 7)); // C - D
+    arestas.add(new Aresta(vertices[4],vertices[2], 10)); // D - B
+    arestas.add(new Aresta(vertices[5],vertices[2], 28)); // T - B
+    arestas.add(new Aresta(vertices[4],vertices[5], 36)); // D - T
     Graph graph = new Graph(vertices, arestas);
-    dijkistra(graph, graph.getVertices()[0]); // usando A de origem
+    dijkistra(graph, graph.getVertices()[0]); // usando S de origem
   }
 
 
@@ -52,43 +52,57 @@ public class Main {
       // Após encontrar os vizinhos, é necessário calcular e atualizar o lambda ( valor minimo entre : prioridades atual do vizinho,
       // prioridade do vertice removido + o custo da aresta entre o removido e o vizinho)
 
-      predecessors.put(root, null); // o root não tem predecessor 
+      predecessors.put(root, new Vertice("Nenhum")); // o root não tem predecessor
       for(Aresta a: graph.getEdges()){
-        if(a.getV1().getName().equals(removedName)){
+        if(a.getV1().getName().equals(removedName) && lambdas.containsKey(a.getV2())){
           // se entrar, o vizinho é v2 e o removido foi v1
+          System.out.println("Removido : " + removedName);
+          System.out.println("Aresta : " + a.getV1().getName() + " -> " + a.getV2().getName());
           int lmbdaAtualizado = Math.min(lambdas.get(a.getV2()), removedCost + a.getWeight());
           if(lmbdaAtualizado < lambdas.get(a.getV2())){ // atualiza o lmbda
             lambdas.put(a.getV2(), lmbdaAtualizado);
+            System.out.println("Lmbda que foi att: " + lmbdaAtualizado);
             // att predecessores
             predecessors.put(a.getV2(), removedVertice);
           }
             
-        } else if(a.getV2().getName().equals(removedName)){
+        } else if(a.getV2().getName().equals(removedName) && lambdas.containsKey(a.getV1())) {
           // se entrar, o vizinho é v1 e o removido foi v2
+          System.out.println("Removido : " + removedName);
+          System.out.println("Aresta : " + a.getV1().getName() + " -> " + a.getV2().getName());
           int lmbdaAtualizado = Math.min(lambdas.get(a.getV1()), removedCost + a.getWeight());
-          if(lmbdaAtualizado < lambdas.get(a.getV1())){
+          if (lmbdaAtualizado < lambdas.get(a.getV1())) {
             lambdas.put(a.getV1(), lmbdaAtualizado);
             // att predecessores
+            System.out.println("Lmbda que foi att: " + lmbdaAtualizado);
             predecessors.put(a.getV1(), removedVertice);
           }
+          System.out.println("");
         }
       }
     }
     // agora usando os predecessores, se constrói o caminho de custo mínimo
-    ArrayList<Vertice> vertices = new ArrayList<>(predecessors.size());
+    Vertice[] vertices = new Vertice[predecessors.size()];
     ArrayList<Aresta> arestas = new ArrayList<>();
+    int cont = 0;
     for(Vertice v: predecessors.keySet()){
-      vertices.add(v); // adicionando os vértices do caminho
+      vertices[cont] = v; // adicionando os vértices do caminho
       if(predecessors.get(v) == null)
         continue;
       arestas.add(new Aresta(v, predecessors.get(v), 0));
+      cont++;
     }
-    Graph minimumCostPath = new Graph((Vertice[])vertices.toArray(), arestas);
+    for(Vertice v: predecessors.keySet()){
+      System.out.println(v.getName() + " tem como predecessor : " + predecessors.get(v).getName());
+    }
+    Graph minimumCostPath = new Graph(vertices, arestas);
 
     for(Aresta a: minimumCostPath.getEdges()){
       System.out.println("Aresta: " + a.getV1().getName() +  " => " + a.getV2().getName());
     }
-
+    for(Vertice v: minimumCostPath.getVertices()){
+      System.out.println("Vertice: " + v.getName());
+    }
 
     return null;
   }
