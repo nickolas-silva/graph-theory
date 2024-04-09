@@ -1,29 +1,31 @@
 package ColetaDeLixo;
+
 import java.util.HashMap;
 
+;
+
 public class Vertice{
-    private String nome; // label
-    private HashMap<Vertice,Integer> arestas; // o inteiro é o peso da aresta
-    
-    public Vertice(String nome, HashMap<Vertice,Integer> arestas){
-      this.nome = nome;
-      this.arestas = arestas;
+    private String name; // label
+    private HashMap<Vertice,Integer> edges; // o inteiro é o peso da aresta
+
+    public Vertice(String name){
+      this.name = name;
     }
 
-    public String getNome() {
-      return nome;
+    public String getName() {
+      return name;
     }
 
-    public void setNome(String nome) {
-      this.nome = nome;
+    public void setName(String name) {
+      this.name = name;
     }
 
-    public HashMap<Vertice,Integer> getArestas() {
-      return arestas;
+    public HashMap<Vertice, Integer> getEdges() {
+      return edges;
     }
 
-    public void setArestas(HashMap<Vertice,Integer> arestas) {
-      this.arestas = arestas;
+    public void setEdges(HashMap<Vertice, Integer> edges) {
+      this.edges = edges;
     }
     
 }
