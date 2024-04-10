@@ -130,10 +130,36 @@ public class Main {
   public static void hierholzer(Graph graph){
     Stack<Vertice> pilha = new Stack(); // pilha usada no algoritmo
     ArrayList<Aresta> arestasDesmarcadas = new ArrayList<>(graph.getEdges()); // todas começam desmarcadas
-    pilha.push(graph.getVertices()[2]); // pega um vertice aleatório
+    pilha.push(graph.getVertices()[0]); // pega um vertice aleatório
+    ArrayList<Vertice> tourDeEuler = new ArrayList<>();
     while(!pilha.isEmpty()){
-      
+      Vertice u = pilha.peek();
+      boolean temArestaDesmarcada = false;
+      for(Aresta a: graph.getEdges()){
+        if(a.getV1().getName().equals(u.getName()) && arestasDesmarcadas.contains(a)){
+          // o vizinho é v2
+          pilha.push(a.getV2());
+          arestasDesmarcadas.remove(a);
+          temArestaDesmarcada = true;
+          break;
+        }
+        if(a.getV2().getName().equals(u.getName()) && arestasDesmarcadas.contains(a)){
+          // o vizinho é v1
+          pilha.push(a.getV1());
+          arestasDesmarcadas.remove(a);
+          temArestaDesmarcada = true;
+          break;
+        }
+        // se não possui aresta incidente desmarcada então remove u do topo da pilha e imprime u
+      }
+      if(!temArestaDesmarcada)
+        tourDeEuler.add(pilha.pop());
     }
+    for(Vertice v: tourDeEuler){
+      System.out.print(v.getName() + " => ");
+    }
+    System.out.println("");
+
   }
   public static void duplicateEdges(Graph graph, Graph minimumCostPath){
 
