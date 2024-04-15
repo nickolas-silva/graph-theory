@@ -4,6 +4,10 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Stack;
+import org.graphstream.graph.*;
+import org.graphstream.graph.implementations.MultiGraph;
+import org.graphstream.graph.implementations.SingleGraph;
+import org.graphstream.ui.graphicGraph.GraphicEdge;
 
 public class Main {
  
@@ -12,6 +16,8 @@ public class Main {
     // se for, então executa o algoritmo de Hierholzer
     // se não, então acha o menor caminho que passe por todos os vértices impares usando djkistra e em seguida gera o supergrafo G*
     // duplicando as arestas do caminho. Aí em seguida, usa o algoritmo de Hierholzer.
+    System.setProperty("org.graphstream.ui", "swing");
+    System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer"); // util para o graphstream
     Vertice[] vertices = new Vertice[5];
     vertices[0] = new Vertice("V1");
     vertices[1] = new Vertice("V2");
@@ -27,30 +33,44 @@ public class Main {
     arestas.add(new Aresta(vertices[2],vertices[3], 5)); //  V3 - V4
     arestas.add(new Aresta(vertices[4],vertices[1], 1)); // V5 - V2
     arestas.add(new Aresta(vertices[1],vertices[3], 4)); // V2 - V4
-    Graph graph = new Graph(vertices, arestas);
+    Graph exemplo2 = new Graph(vertices, arestas);
+
+    Vertice[] vertices2 = new Vertice[5];
+    vertices2[0] = new Vertice("Cruzamento X");
+    vertices2[1] = new Vertice("Cruzamento Y");
+    vertices2[2] = new Vertice("Cruzamento Z");
+    vertices2[3] = new Vertice("Cruzamento W");
+    vertices2[4] = new Vertice("Cruzamento V");
+    ArrayList<Aresta> arestas2 = new ArrayList<>();
+    arestas2.add(new Aresta(vertices2[0],vertices2[1], 10)); // x y
+    arestas2.add(new Aresta(vertices2[0],vertices2[2], 12)); // x z
+    arestas2.add(new Aresta(vertices2[1],vertices2[2], 20));  // y z
+    arestas2.add(new Aresta(vertices2[2],vertices2[3], 6));  // z w
+    arestas2.add(new Aresta(vertices2[2],vertices2[4], 14)); // z v
+    arestas2.add(new Aresta(vertices2[3],vertices2[4], 8)); //  v w
+    Graph exemplo = new Graph(vertices2,arestas2);
+
+
+    execute(exemplo);
+    execute(exemplo2);
+  }
+  public static void execute(Graph graph){
     ArrayList<Vertice> verticesImpares = hasEulerTour(graph);
     if(verticesImpares.isEmpty()){ // não tem nenhum vértice impar
       System.out.println("É euleriano");
+      hierholzer(graph);
     } else if(verticesImpares.size() == 2){
       System.out.println("Não é euleriano");
+      //visualize(graph);
       Graph minimumCostPath = dijkistra(graph, verticesImpares); // usando A de origem
       duplicateEdges(graph, minimumCostPath);
-      System.out.println("Caminho de custo mínimo entre os vértices impares");
-      for(Aresta a: minimumCostPath.getEdges()){
-        System.out.println("Aresta : " + a.getV1().getName() + " => " + a.getV2().getName());
-      }
-      System.out.println("");
-      System.out.println("Supergrafo g*");
-      for(Aresta a: graph.getEdges()){
-        System.out.println("Aresta : " + a.getV1().getName() + " => " + a.getV2().getName() + " ---- " + a.getWeight());
-      }
+      //visualize(graph);
       System.out.println(hasEulerTour(graph).isEmpty() ? "Euleriano" : "Nao euleriano");
       hierholzer(graph);
     } else {
       System.out.println("Algoritmo só suporta o caso trivial no qual um grafo não euleriano possui vertices de grau impar == 2");
     }
   }
-
 
   public static Graph dijkistra(Graph graph, ArrayList<Vertice> verticesImpares){
 
@@ -132,6 +152,7 @@ public class Main {
     ArrayList<Aresta> arestasDesmarcadas = new ArrayList<>(graph.getEdges()); // todas começam desmarcadas
     pilha.push(graph.getVertices()[0]); // pega um vertice aleatório
     ArrayList<Vertice> tourDeEuler = new ArrayList<>();
+    Vertice inicio = pilha.peek();
     while(!pilha.isEmpty()){
       Vertice u = pilha.peek();
       boolean temArestaDesmarcada = false;
@@ -155,11 +176,7 @@ public class Main {
       if(!temArestaDesmarcada)
         tourDeEuler.add(pilha.pop());
     }
-    for(Vertice v: tourDeEuler){
-      System.out.print(v.getName() + " => ");
-    }
-    System.out.println("");
-
+    visualizeTour(graph,tourDeEuler);
   }
   public static void duplicateEdges(Graph graph, Graph minimumCostPath){
 
@@ -199,5 +216,61 @@ public class Main {
     return retorno ; // retorna o vértice que foi removido da fila e sua prioridade.
   }
 
+  public static void visualize(Graph graph){
+    org.graphstream.graph.Graph graph2 = new MultiGraph("Coleta de lixo");
 
+    for(Vertice v:graph.getVertices()){
+      Node added = graph2.addNode(v.getName());
+      added.setAttribute("ui.label", v.getName());
+      added.setAttribute("ui.style", "shape:circle;fill-color: yellow;size: 50px; text-alignment: center;");
+    }
+    int cont = 0;
+    for(Aresta a: graph.getEdges()){
+      String id = Integer.toString(cont);
+      Edge added = graph2.addEdge(id,a.getV1().getName(),a.getV2().getName());
+      String label = a.getV1().getName() + a.getV2().getName();
+      added.setAttribute("ui.label", label);
+      cont++;
+    }
+    graph2.display();
+  }
+  public static void visualizeTour(Graph graph, ArrayList<Vertice> tour){
+    org.graphstream.graph.Graph graph2 = new MultiGraph("Tour de euler");
+
+    for(Vertice v: tour){
+      System.out.print(v.getName() + " --> ");
+    }
+    System.out.println();
+    int cont  = 0;
+    for(Vertice v:graph.getVertices()){
+      Node added = graph2.addNode(v.getName());
+      added.setAttribute("ui.label", v.getName());
+      added.setAttribute("ui.style", "shape:circle;fill-color: yellow;size: 50px; text-alignment: center;");
+    }
+    cont = 0;
+    // formar as arestas de acorod com a lista
+    for(int i = 0; i +1 < tour.size(); i++){
+      Vertice v1 = tour.get(i);
+      Vertice v2 = tour.get(i+1);
+      boolean existe = false;
+      for(int j = 0; j < graph2.getEdgeCount(); j++){
+        Node zero = graph2.getEdge(j).getNode0();
+        Node um = graph2.getEdge(j).getNode1();
+
+        if( (zero.getId().equals(v1.getName()) && um.getId().equals(v2.getName()))
+                || (zero.getId().equals(v2.getName()) && um.getId().equals(v1.getName())) ){
+          existe = true;
+        }
+
+      }
+      Edge e =graph2.addEdge(Integer.toString(i), v1.getName(), v2.getName());
+      e.setAttribute("ui.label", i);
+      if(existe){
+        e.setAttribute("ui.style", "text-alignment:under;text-size:15;");
+      }else {
+        e.setAttribute("ui.style", "text-alignment:above;text-size:15;");
+      }
+    }
+    graph2.display();
+  }
 }
