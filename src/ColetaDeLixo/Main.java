@@ -50,9 +50,48 @@ public class Main {
     arestas2.add(new Aresta(vertices2[3],vertices2[4], 8)); //  v w
     Graph exemplo = new Graph(vertices2,arestas2);
 
+    Vertice[] vertices3 = new Vertice[6];
+    vertices3[0] = new Vertice("X"); // vai partir de X
+    vertices3[1] = new Vertice("Y");
+    vertices3[2] = new Vertice("Z");
+    vertices3[3] = new Vertice("W");
+    vertices3[4] = new Vertice("F");
+    vertices3[5] = new Vertice("G");
 
-    execute(exemplo);
-    execute(exemplo2);
+    ArrayList<Aresta> arestas3 = new ArrayList<>();
+    arestas3.add(new Aresta(vertices3[0],vertices3[1],6)); // xy
+    arestas3.add(new Aresta(vertices3[0],vertices3[2],16)); // xz
+    arestas3.add(new Aresta(vertices3[3],vertices3[2],6)); // zw
+    arestas3.add(new Aresta(vertices3[3],vertices3[1],16)); // yw
+    arestas3.add(new Aresta(vertices3[4],vertices3[1],6)); // fy
+    arestas3.add(new Aresta(vertices3[3],vertices3[5],6)); // gw
+    arestas3.add(new Aresta(vertices3[4],vertices3[5],16)); // fg
+    Graph exemplo3 = new Graph(vertices3, arestas3);
+
+    Vertice[] vertices4 = new Vertice[6];
+    vertices4[0] = new Vertice("a");
+    vertices4[1] = new Vertice("b");
+    vertices4[2] = new Vertice("s");
+    vertices4[3] = new Vertice("c");
+    vertices4[4] = new Vertice("d");
+    vertices4[5] = new Vertice("t");
+    ArrayList<Aresta> arestas4 = new ArrayList<>();
+    arestas4.add(new Aresta(vertices4[0], vertices4[2], 18)); // a - s 18
+    arestas4.add(new Aresta(vertices4[0], vertices4[1], 9)); // a - b 9
+    arestas4.add(new Aresta(vertices4[0], vertices4[3], 2)); //  a - c 2
+    arestas4.add(new Aresta(vertices4[2], vertices4[3], 15)); // s - c 15
+    arestas4.add(new Aresta(vertices4[3], vertices4[1], 14)); // c - b 14
+    arestas4.add(new Aresta(vertices4[4], vertices4[3], 7)); // c - d 7
+    arestas4.add(new Aresta(vertices4[1], vertices4[4], 10)); // b -d 10
+    arestas4.add(new Aresta(vertices4[5], vertices4[1], 28)); // b - t 28
+    arestas4.add(new Aresta(vertices4[5], vertices4[4], 36)); // d - t 36
+    Graph exemplo4 = new Graph(vertices4,arestas4);
+
+    //execute(exemplo);
+    //execute(exemplo2);
+    //execute(exemplo3);
+    //execute(exemplo4);
+
   }
   public static void execute(Graph graph){
     ArrayList<Vertice> verticesImpares = hasEulerTour(graph);
@@ -63,6 +102,7 @@ public class Main {
       System.out.println("Não é euleriano");
       //visualize(graph);
       Graph minimumCostPath = dijkistra(graph, verticesImpares); // usando A de origem
+      //visualize(minimumCostPath);
       duplicateEdges(graph, minimumCostPath);
       //visualize(graph);
       System.out.println(hasEulerTour(graph).isEmpty() ? "Euleriano" : "Nao euleriano");
@@ -76,18 +116,21 @@ public class Main {
 
     // definir e inicializar a fila dos lambdas
     Vertice root = verticesImpares.get(0);
-    HashMap<Vertice, Integer> lambdas = new HashMap<>(); // guarda o vertice e qual a prioridade dele
+    HashMap<Vertice, Integer> NaoVisitados = new HashMap<>(); // guarda o vertice e qual a prioridade dele
     // inicialmente o root tem prioridade máxima (0) e os outros prioridade minima (infinito)
-    inicializeLambdas(lambdas, graph, root);
+    inicializeNaoVisitados(NaoVisitados, graph, root);
     int totalCost = 0;
+    ArrayList<Vertice> s = new ArrayList<>();
     HashMap<Vertice,Vertice> predecessors = new HashMap<>();
     Vertice removedVertice = new Vertice("Random");
-    while(removedVertice != verticesImpares.get(1)){
+    while(!removedVertice.getName().equals(verticesImpares.get(1).getName())){
       // agora, é necessário remover da fila de prioridade o vértice com menor prioridade
-      HashMap<Vertice,Integer> removed = removeLessPriorityValue(lambdas);
+      HashMap<Vertice,Integer> removed = removeLessPriorityValue(NaoVisitados);
       String removedName = ((Vertice)removed.keySet().toArray()[0]).getName();
       Integer removedCost = (Integer) removed.values().toArray()[0];
       removedVertice = (Vertice)removed.keySet().toArray()[0];
+      if(removedVertice.getName().equals(verticesImpares.get(1).getName())) break;
+      s.add(removedVertice);
       totalCost += removedCost;
       // agora, é necessário descobrir os vizinhos de removed
       // Após encontrar os vizinhos, é necessário calcular e atualizar o lambda ( valor minimo entre : prioridades atual do vizinho,
@@ -95,21 +138,21 @@ public class Main {
 
       predecessors.put(root, new Vertice("Nenhum")); // o root não tem predecessor
       for(Aresta a: graph.getEdges()){
-        if(a.getV1().getName().equals(removedName) && lambdas.containsKey(a.getV2())){
+        if(a.getV1().getName().equals(removedName) && NaoVisitados.containsKey(a.getV2())){
           // se entrar, o vizinho é v2 e o removido foi v1
-          int lmbdaAtualizado = Math.min(lambdas.get(a.getV2()), removedCost + a.getWeight());
-          if(lmbdaAtualizado < lambdas.get(a.getV2())){ // atualiza o lmbda
-            lambdas.put(a.getV2(), lmbdaAtualizado);
+          int lmbdaAtualizado = Math.min(NaoVisitados.get(a.getV2()), removedCost + a.getWeight());
+          if(lmbdaAtualizado < NaoVisitados.get(a.getV2())){ // atualiza o lmbda
+            NaoVisitados.put(a.getV2(), lmbdaAtualizado);
             // att predecessores
             predecessors.put(a.getV2(), removedVertice);
           }
             
-        } else if(a.getV2().getName().equals(removedName) && lambdas.containsKey(a.getV1())) {
+        } else if(a.getV2().getName().equals(removedName) && NaoVisitados.containsKey(a.getV1())) {
           // se entrar, o vizinho é v1 e o removido foi v2
           
-          int lmbdaAtualizado = Math.min(lambdas.get(a.getV1()), removedCost + a.getWeight());
-          if (lmbdaAtualizado < lambdas.get(a.getV1())) {
-            lambdas.put(a.getV1(), lmbdaAtualizado);
+          int lmbdaAtualizado = Math.min(NaoVisitados.get(a.getV1()), removedCost + a.getWeight());
+          if (lmbdaAtualizado < NaoVisitados.get(a.getV1())) {
+            NaoVisitados.put(a.getV1(), lmbdaAtualizado);
             // att predecessores
             predecessors.put(a.getV1(), removedVertice);
           }
@@ -117,17 +160,30 @@ public class Main {
       }
     }
     // agora usando os predecessores, se constrói o caminho de custo mínimo
-    Vertice[] vertices = new Vertice[predecessors.size()];
+    ArrayList<Vertice> vertices = new ArrayList<>();
     ArrayList<Aresta> arestas = new ArrayList<>();
     int cont = 0;
-    for(Vertice v: predecessors.keySet()){
-      vertices[cont] = v; // adicionando os vértices do caminho
-      if(predecessors.get(v) == null)
-        continue;
-      arestas.add(new Aresta(v, predecessors.get(v), 0));
-      cont++;
+    Vertice ultimo = verticesImpares.get(1);
+    Vertice inicio = root;
+    Vertice atual;
+    atual = predecessors.get(ultimo);
+    Vertice anterior = ultimo;
+    arestas.add(new Aresta(atual, anterior, 0));
+    vertices.add(anterior);
+    vertices.add(atual);
+    anterior = atual;
+    while(atual != inicio){
+      atual = predecessors.get(atual);
+      vertices.add(atual);
+      arestas.add(new Aresta(atual, anterior, 0));
+      anterior = atual;
     }
-    Graph minimumCostPath = new Graph(vertices, arestas);
+    Vertice[] verticesArr = new Vertice[vertices.size()];
+    cont = 0;
+    for(Vertice v: vertices){
+      verticesArr[cont] = v;
+    }
+    Graph minimumCostPath = new Graph(verticesArr, arestas);
 
     return minimumCostPath;
   }
@@ -197,22 +253,22 @@ public class Main {
       graph.getEdges().add(a); // adicionar as arestas extras formando o supergrafo g*
     }
   }
-  public static void inicializeLambdas(HashMap<Vertice, Integer> lambdas, Graph graph, Vertice root){
+  public static void inicializeNaoVisitados(HashMap<Vertice, Integer> NaoVisitados, Graph graph, Vertice root){
     for (Vertice v : graph.getVertices()) {
-        lambdas.put(v, 99999); // um valor alto para simbolizar infinito
-    }    
-    lambdas.put(root, 0);   
+      NaoVisitados.put(v, 99999); // um valor alto para simbolizar infinito
+    }
+    NaoVisitados.put(root, 0);
   }
-  public static HashMap<Vertice,Integer> removeLessPriorityValue(HashMap<Vertice, Integer> lambdas){
-    Vertice removed = (Vertice) lambdas.keySet().toArray()[0]; // pegando o primeiro
-    for(Vertice v: lambdas.keySet()){
-      if(lambdas.get(removed) > lambdas.get(v)){
+  public static HashMap<Vertice,Integer> removeLessPriorityValue(HashMap<Vertice, Integer> NaoVisitados){
+    Vertice removed = (Vertice) NaoVisitados.keySet().toArray()[0]; // pegando o primeiro
+    for(Vertice v: NaoVisitados.keySet()){
+      if(NaoVisitados.get(removed) > NaoVisitados.get(v)){
         removed = v;
       }
     }
     HashMap<Vertice,Integer> retorno = new HashMap<>();
-    retorno.put(removed, lambdas.get(removed));
-    lambdas.remove(removed);
+    retorno.put(removed, NaoVisitados.get(removed));
+    NaoVisitados.remove(removed);
     return retorno ; // retorna o vértice que foi removido da fila e sua prioridade.
   }
 
