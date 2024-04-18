@@ -1,0 +1,15 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="graph-theory:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/graph_theory_jar</output-path>
+    <root id="archive" name="graph-theory.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$USER_HOME$/Documents/jar/META-INF/MANIFEST.MF" />
+      </element>
+      <element id="module-output" name="graph-theory" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/dependecies/gs-ui-swing-2.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/dependecies/gs-core-2.0.jar" path-in-jar="/" />
+      <element id="file-copy" path="$PROJECT_DIR$/dependecies/gs-ui-swing-2.0.jar" />
+      <element id="file-copy" path="$PROJECT_DIR$/dependecies/gs-core-2.0.jar" />
+    </root>
+  </artifact>
+</component>

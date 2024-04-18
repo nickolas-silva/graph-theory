@@ -89,7 +89,7 @@ public class Main {
 
     //execute(exemplo);
     //execute(exemplo2);
-    //execute(exemplo3);
+    execute(exemplo3);
     //execute(exemplo4);
 
   }
@@ -322,9 +322,9 @@ public class Main {
       Edge e =graph2.addEdge(Integer.toString(i), v1.getName(), v2.getName());
       e.setAttribute("ui.label", i);
       if(existe){
-        e.setAttribute("ui.style", "text-alignment:under;text-size:15;");
+        e.setAttribute("ui.style", "text-alignment:under;text-size:25;");
       }else {
-        e.setAttribute("ui.style", "text-alignment:above;text-size:15;");
+        e.setAttribute("ui.style", "text-alignment:above;text-size:25;");
       }
     }
     graph2.display();
